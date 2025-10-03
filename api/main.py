@@ -33,7 +33,7 @@ app.add_middleware(
 # --- 3. LOAD MODEL AND METADATA ON STARTUP ---
 
 # --- BUG FIX 1: Corrected model filename ---
-MODEL_PATH = Path("plant_disease_model_resnet34(2).pkl")
+MODEL_PATH = Path("plant_disease_model_resnet34.pkl")
 DISEASE_INFO_PATH = Path("disease_info.json")
 
 learn = None
