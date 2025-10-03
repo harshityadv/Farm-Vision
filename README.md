@@ -1,4 +1,5 @@
 FARM-VISION
+
 Mobile‑first crop disease detection with a Next.js frontend and a FastAPI backend powered by a fastai model and disease_info.json metadata.
 
 Overview
