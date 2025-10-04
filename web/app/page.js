@@ -39,6 +39,94 @@ const TrashIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 
 const LogoutIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>);
 const CheckIcon = () => (<svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>);
 
+// --- Localized crop labels and lightweight Hindi translation helpers ---
+
+// Crops used in UI (category grid, headers)
+const CROPS = [
+  { id: 'apple',    en: 'Apple',      hi: 'सेब',        emoji: '🍎' },
+  { id: 'cherry',   en: 'Cherry',     hi: 'चेरी',       emoji: '🍒' },
+  { id: 'corn',     en: 'Corn',       hi: 'मक्का',      emoji: '🌽' },
+  { id: 'grape',    en: 'Grape',      hi: 'अंगूर',      emoji: '🍇' },
+  { id: 'peach',    en: 'Peach',      hi: 'आड़ू',       emoji: '🍑' },
+  { id: 'pepper',   en: 'Pepper',     hi: 'शिमला मिर्च', emoji: '🫑' },
+  { id: 'potato',   en: 'Potato',     hi: 'आलू',        emoji: '🥔' },
+  { id: 'strawberry', en: 'Strawberry', hi: 'स्ट्रॉबेरी', emoji: '🍓' },
+  { id: 'tomato',   en: 'Tomato',     hi: 'टमाटर',      emoji: '🍅' }
+];
+
+// Species names as they appear from backend JSON -> Hindi label
+const SPECIES_HI = {
+  'Apple': 'सेब',
+  'Corn (Maize)': 'मक्का',
+  'Bell Pepper': 'शिमला मिर्च',
+  'Grape': 'अंगूर',
+  'Peach': 'आड़ू',
+  'Potato': 'आलू',
+  'Strawberry': 'स्ट्रॉबेरी',
+  'Tomato': 'टमाटर',
+  'Cherry': 'चेरी',
+  'Blueberry': 'ब्लूबेरी',
+  'Raspberry': 'रास्पबेरी',
+  'Soybean': 'सोयाबीन',
+  'Squash': 'कद्दू',
+  'Orange': 'संतरा'
+};
+
+const cropLabel = (id, lang = 'en') => {
+  const c = CROPS.find(x => x.id === id);
+  return c ? (lang === 'hi' ? c.hi : c.en) : id || '';
+};
+
+const speciesLabel = (species, lang = 'en') => {
+  if (!species) return '';
+  return lang === 'hi' ? (SPECIES_HI[species] || species) : species;
+};
+
+// Ultra‑light keyword substitution to Hindi for JSON text.
+// Not perfect, but covers common words appearing across disease_info.json.
+const EN_HI_PAIRS = [
+  ['Caused by', 'के कारण'],
+  ['fungus', 'कवक'],
+  ['bacterium', 'जीवाणु'],
+  ['bacteria', 'जीवाणु'],
+  ['virus', 'वायरस'],
+  ['Apply', 'लागू करें'],
+  ['Use', 'उपयोग करें'],
+  ['Remove', 'हटा दें'],
+  ['Avoid', 'बचें'],
+  ['water', 'पानी'],
+  ['watering', 'सिंचाई'],
+  ['humid', 'आर्द्र'],
+  ['warm', 'गर्म'],
+  ['cool', 'ठंडा'],
+  ['dry', 'शुष्क'],
+  ['resistant varieties', 'प्रतिरोधी किस्में'],
+  ['copper', 'तांबे'],
+  ['fungicides', 'कवकनाशी'],
+  ['insecticides', 'कीटनाशक'],
+  ['oil', 'तेल'],
+  ['soap', 'साबुन'],
+  ['Rotate crops', 'फसल चक्र अपनाएं'],
+  ['There is no cure', 'कोई इलाज नहीं है'],
+  ['Remove infected plants', 'संक्रमित पौधों को हटाएं'],
+  ['Good air circulation', 'अच्छा वायु संचार'],
+  ['mulch', 'मल्च']
+];
+
+const translateToHindi = (text) => {
+  if (!text || typeof text !== 'string') return text;
+  let out = text;
+  for (const [en, hi] of EN_HI_PAIRS) {
+    const re = new RegExp(`\\b${en}\\b`, 'gi');
+    out = out.replace(re, (m) => {
+      // Preserve leading capitalization if needed
+      const isCap = /^[A-Z]/.test(m);
+      return isCap ? hi : hi;
+    });
+  }
+  return out;
+};
+
 // --- Translations (unchanged texts + guest) ---
 const translations = { 
   en: { appName: "Crop Doc", appDescription: "Scan a leaf of the selected crop.", scanButton: "SCAN PLANT LEAF", historyButton: "View Scan History", analyzing: "Analyzing your leaf...", status: "STATUS", diseased: "DISEASED", healthy: "HEALTHY", confidence: "CONFIDENCE", cause: "Cause", prevention: "Prevention", treatment: "Treatment", scanAnother: "Scan Another", scanHistory: "Scan History", noHistory: "Your saved scans will appear here.", back: "Back", loginTitle: "Welcome to Crop Doc", loginSub: "Sign in or continue as a guest.", loginButton: "Sign In with Google", guestButton: "Continue as Guest", saveButton: "Save to History", saved: "History Saved!", storageFull: "History is full (10 max).", yourId: "Your User ID:", "Failed to save.": "Failed to save.", loginError: "Login failed. Please try again.", loggingIn: "Signing In...", selectCrop: "Select a Crop", healthyMessage: "Your plant appears to be healthy! Keep up the great work.", changeCrop: "Change Crop", logout: "Logout", analysisErrorTitle: "Analysis Failed", analysisErrorBody: "Could not connect to the server. Please check if the backend is running and try again.", tryAgain: "Try Again", saving: "Saving...", guestSavePrompt: "Sign in with Google to save your scan history." }, 
@@ -95,23 +183,16 @@ const LoginScreen = ({ t, onLogin, onGuestLogin, error, status }) => (
   </div>
 );
 
-// --- Category selection (unchanged layout; keep your options) ---
-const CategorySelectionScreen = ({ onSelectCategory, onLogout, t }) => {
-  const categories = [
-    { id: 'apple', name: 'Apple', emoji: '🍎' }, { id: 'cherry', name: 'Cherry', emoji: '🍒' },
-    { id: 'corn', name: 'Corn', emoji: '🌽' }, { id: 'grape', name: 'Grape', emoji: '🍇' },
-    { id: 'peach', name: 'Peach', emoji: '🍑' }, { id: 'pepper', name: 'Pepper', emoji: '🫑' },
-    { id: 'potato', name: 'Potato', emoji: '🥔' }, { id: 'strawberry', name: 'Strawberry', emoji: '🍓' },
-    { id: 'tomato', name: 'Tomato', emoji: '🍅' },
-  ];
+// --- Category selection ---
+const CategorySelectionScreen = ({ onSelectCategory, onLogout, t, language }) => {
   return (
     <div className="w-full max-w-lg mx-auto bg-white rounded-2xl shadow-xl p-8 z-10 text-center">
       <h2 className="text-3xl font-bold text-gray-800 mb-6">{t.selectCrop}</h2>
       <div className="grid grid-cols-3 gap-4">
-        {categories.map(cat => (
+        {CROPS.map(cat => (
           <button key={cat.id} onClick={() => onSelectCategory(cat.id)} className="p-4 bg-gray-100 rounded-xl hover:bg-green-100 hover:shadow-lg transition-all transform hover:scale-105">
             <div className="text-5xl mb-2">{cat.emoji}</div>
-            <p className="font-semibold text-gray-700 text-sm">{cat.name}</p>
+            <p className="font-semibold text-gray-700 text-sm">{language === 'hi' ? cat.hi : cat.en}</p>
           </button>
         ))}
       </div>
@@ -123,7 +204,7 @@ const CategorySelectionScreen = ({ onSelectCategory, onLogout, t }) => {
 };
 
 // --- Start screen (camera + gallery) ---
-const StartScreen = ({ onScan, onShowHistory, t, category, onChangeCategory, isGuest }) => {
+const StartScreen = ({ onScan, onShowHistory, t, category, onChangeCategory, isGuest, language }) => {
   const cameraInputRef = useRef(null);
   const galleryInputRef = useRef(null);
 
@@ -139,7 +220,9 @@ const StartScreen = ({ onScan, onShowHistory, t, category, onChangeCategory, isG
   return (
     <div className="text-center z-10">
       <div className="text-7xl mb-4">{emojiForCategory(category)}</div>
-      <h1 className="text-4xl font-bold text-gray-800 mt-4 capitalize">{category} {t.appName}</h1>
+      <h1 className="text-4xl font-bold text-gray-800 mt-4 capitalize">
+        {cropLabel(category, language)} {t.appName}
+      </h1>
       <p className="text-gray-600 mt-2 mb-8 max-w-xs mx-auto">{t.appDescription}</p>
 
       <input type="file" accept="image/*" capture="environment" onChange={onScan} className="hidden" ref={cameraInputRef} />
@@ -175,10 +258,14 @@ const LoadingScreen = ({ t }) => (
   </div>
 );
 
-// --- Result screen (adds Prevention + correct health logic consumption) ---
-const ResultScreen = ({ result, imagePreview, onReset, onSave, onChangeCategory, t, isSaved, isGuest }) => {
+// --- Result screen (Prevention + localized crop/species + Hindi details) ---
+const ResultScreen = ({ result, imagePreview, onReset, onSave, onChangeCategory, t, isSaved, isGuest, language }) => {
   const isHealthy = result.status === 'Healthy';
   const confidencePercentage = (Number(result.confidence) * 100).toFixed(0);
+
+  const cropTitle = result.name_of_species
+    ? speciesLabel(result.name_of_species, language)
+    : '';
 
   return (
     <div>
@@ -190,6 +277,14 @@ const ResultScreen = ({ result, imagePreview, onReset, onSave, onChangeCategory,
         )}
 
         <div className="p-5">
+          {/* Crop name (localized) */}
+          {cropTitle && (
+            <div className="mb-3">
+              <p className="text-xs font-semibold text-gray-500 tracking-wide">{language === 'hi' ? 'फसल' : 'CROP'}</p>
+              <p className="text-lg font-bold text-gray-900">{cropTitle}</p>
+            </div>
+          )}
+
           <div className={`p-3 rounded-lg flex items-center justify-between ${isHealthy ? 'bg-green-100 text-green-800 ring-green-300' : 'bg-red-100 text-red-800 ring-red-300'} ring-2`}>
             <p className="text-2xl font-bold">{isHealthy ? t.healthy : t.diseased}</p>
             <p className="text-4xl font-bold">{isHealthy ? '✅' : '❗️'}</p>
@@ -217,7 +312,7 @@ const ResultScreen = ({ result, imagePreview, onReset, onSave, onChangeCategory,
                     <p className="text-gray-800">{result.cause}</p>
                   </div>
 
-                  {/* Prevention (added) */}
+                  {/* Prevention */}
                   <div className="text-sm">
                     <p className="font-bold text-gray-600">{t.prevention}</p>
                     <p className="text-gray-800">{result.prevention}</p>
@@ -258,7 +353,7 @@ const ResultScreen = ({ result, imagePreview, onReset, onSave, onChangeCategory,
 };
 
 // --- History & Error screens (unchanged layout) ---
-const HistoryScreen = ({ history, onSelect, onBack, t, onDelete }) => {
+const HistoryScreen = ({ history, onSelect, onBack, t, onDelete, language }) => {
   const emojiForCategory = (category) => {
     switch (category) { case 'apple': return '🍎'; case 'cherry': return '🍒'; case 'corn': return '🌽'; case 'grape': return '🍇'; case 'peach': return '🍑'; case 'pepper': return '🫑'; case 'potato': return '🥔'; case 'strawberry': return '🍓'; case 'tomato': return '🍅'; default: return '🌿'; }
   };
@@ -270,7 +365,7 @@ const HistoryScreen = ({ history, onSelect, onBack, t, onDelete }) => {
       ) : (
         <ul className="space-y-3 max-h-[60vh] overflow-y-auto">
           {history.map((item) => {
-            const diseaseName = item.result.status === 'Healthy' ? t.healthy : item.result.diseaseName;
+            const diseaseName = item.result.status === 'Healthy' ? (language === 'hi' ? 'स्वस्थ' : 'Healthy') : item.result.diseaseName;
             return (
               <li key={item.id} className="flex items-center p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
                 <div className="text-4xl mr-4">{emojiForCategory(item.category)}</div>
@@ -343,7 +438,7 @@ export default function HomePage() {
   const handleSelectCategory = (category) => dispatch({ type: 'SELECT_CATEGORY', payload: category });
   const handleChangeCategory = () => dispatch({ type: 'CHANGE_CATEGORY' });
 
-  // Image flow with robust health detection + prevention surfaced
+  // Image flow with robust health detection + Hindi details when needed
   const handleImageChange = async (event) => {
     const originalFile = event.target.files[0];
     if (!originalFile) return;
@@ -357,10 +452,8 @@ export default function HomePage() {
     let finalPreviewUrl = tempPreviewUrl;
 
     try {
-      // Optional: client resize could be added here. Keeping simple and robust.
-    } catch {
-      // Ignore; use original file
-    }
+      // Optional client resize can be added here.
+    } catch {}
 
     try {
       const formData = new FormData();
@@ -371,7 +464,7 @@ export default function HomePage() {
 
       const resultData = await response.json();
 
-      // --- robust field extraction from backend payload ---
+      // robust extraction
       const details = resultData.details || {};
       const diseaseName = details.disease_name || 'Healthy';
       const diseasedOrHealthy = details.diseased_or_healthy || '';
@@ -382,7 +475,7 @@ export default function HomePage() {
         /^(none|healthy)$/i.test(diseaseName) ||
         /healthy/i.test(predictedClass);
 
-      const transformedResult = {
+      const baseResult = {
         status: isHealthy ? 'Healthy' : 'Diseased',
         confidence: Number(resultData.confidence) || 0,
         name_of_species: details.name_of_species || '',
@@ -392,7 +485,16 @@ export default function HomePage() {
         treatment: details.treatment || 'No information available.'
       };
 
-      dispatch({ type: 'ANALYSIS_SUCCESS', payload: { result: transformedResult, imagePreview: finalPreviewUrl } });
+      // Localize species + details if Hindi selected
+      if (language === 'hi') {
+        baseResult.name_of_species = speciesLabel(baseResult.name_of_species, 'hi');
+        baseResult.cause = translateToHindi(baseResult.cause);
+        baseResult.prevention = translateToHindi(baseResult.prevention);
+        baseResult.treatment = translateToHindi(baseResult.treatment);
+        if (/^healthy$/i.test(baseResult.diseaseName)) baseResult.diseaseName = 'स्वस्थ';
+      }
+
+      dispatch({ type: 'ANALYSIS_SUCCESS', payload: { result: baseResult, imagePreview: finalPreviewUrl } });
     } catch (error) {
       dispatch({ type: 'ANALYSIS_ERROR', payload: { error: t.analysisErrorBody } });
     }
@@ -434,11 +536,11 @@ export default function HomePage() {
     switch (state.status) {
       case 'authenticating': return <LoginScreen t={t} onLogin={handleLogin} onGuestLogin={handleGuestLogin} status={state.status} />;
       case 'login': return <LoginScreen t={t} onLogin={handleLogin} onGuestLogin={handleGuestLogin} error={state.error} status={state.status} />;
-      case 'category_selection': return <CategorySelectionScreen onSelectCategory={handleSelectCategory} onLogout={handleLogout} t={t} />;
-      case 'idle': return <StartScreen onScan={handleImageChange} onShowHistory={handleShowHistory} onChangeCategory={handleChangeCategory} t={t} category={state.selectedCategory} isGuest={state.isGuest} />;
+      case 'category_selection': return <CategorySelectionScreen t={t} onSelectCategory={handleSelectCategory} onLogout={handleLogout} language={language} />;
+      case 'idle': return <StartScreen t={t} category={state.selectedCategory} onScan={handleImageChange} onShowHistory={handleShowHistory} onChangeCategory={handleChangeCategory} isGuest={state.isGuest} language={language} />;
       case 'loading': return <LoadingScreen t={t} />;
-      case 'success': return <ResultScreen result={state.result} imagePreview={state.imagePreview} onReset={handleReset} onSave={handleSave} onChangeCategory={handleChangeCategory} t={t} isSaved={isSaved} isGuest={state.isGuest} />;
-      case 'history': return <HistoryScreen history={state.history} onSelect={handleHistorySelect} onBack={handleChangeCategory} t={t} onDelete={handleDelete} />;
+      case 'success': return <ResultScreen t={t} result={state.result} imagePreview={state.imagePreview} onReset={handleReset} onSave={handleSave} onChangeCategory={handleChangeCategory} isSaved={isSaved} isGuest={state.isGuest} language={language} />;
+      case 'history': return <HistoryScreen t={t} history={state.history} onSelect={handleHistorySelect} onBack={handleChangeCategory} onDelete={handleDelete} language={language} />;
       case 'error': return <ErrorScreen t={t} error={state.error} onTryAgain={handleReset} />;
       default: return <LoginScreen t={t} onLogin={handleLogin} onGuestLogin={handleGuestLogin} error={state.error} status={state.status} />;
     }

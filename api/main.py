@@ -92,14 +92,15 @@ async def predict(file: UploadFile = File(...)):
         pred_class, pred_idx, outputs = await run_in_threadpool(learn.predict, img)
         
         confidence = outputs[pred_idx].item()
-        
+        print(confidence)
         # --- IMPROVEMENT: Handle low-confidence predictions ---
-        if confidence < 0.5:  # 50% threshold
+        if confidence < 0.7:  # 50% threshold
             return {
                 "predicted_class": "Uncertain",
                 "confidence": f"{confidence:.4f}",
                 "details": {
                     "name_of_species": "Unknown",
+                    "diseased_or_healthy": "Diseased",
                     "disease_name": "Could not determine with high confidence.",
                     "cause": "The model is uncertain about the prediction. This could be due to a poor quality image or an unfamiliar plant/disease.",
                     "prevention": "Please try again with a clearer image, ensuring the affected area is well-lit and in focus.",
